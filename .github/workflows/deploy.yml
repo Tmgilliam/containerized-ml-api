@@ -7,6 +7,7 @@ on:
 env:
   GCP_REGION: us-central1
   SERVICE_NAME: containerized-ml-api
+  ARTIFACT_REGISTRY: erp-repo
 
 jobs:
   deploy:
@@ -29,11 +30,11 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
       - name: Build Docker image
         run: |
-          IMAGE="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
           docker build -t "$IMAGE" .
 
@@ -45,7 +46,7 @@ jobs:
         run: |
           gcloud run deploy "${{ env.SERVICE_NAME }}" \
             --image "$IMAGE" \
-            --region "${{ secrets.GCP_REGION }}" \
+            --region "${{ env.GCP_REGION }}" \
             --project "${{ secrets.GCP_PROJECT_ID }}" \
             --platform managed \
             --allow-unauthenticated \
@@ -54,10 +55,10 @@ jobs:
             --min-instances 0 \
             --max-instances 3 \
             --timeout 30 \
-            --set-env-vars "ENVIRONMENT=production" \
+            --set-env-vars "ENVIRONMENT=production,MODEL_VERSION=1.0.0" \
             --quiet
           URL=$(gcloud run services describe "${{ env.SERVICE_NAME }}" \
-            --region "${{ secrets.GCP_REGION }}" \
+            --region "${{ env.GCP_REGION }}" \
             --project "${{ secrets.GCP_PROJECT_ID }}" \
             --format 'value(status.url)')
           echo "service_url=$URL" >> "$GITHUB_OUTPUT"
