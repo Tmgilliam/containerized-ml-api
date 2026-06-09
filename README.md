@@ -2,6 +2,8 @@
 
 **Owner:** Dr. Tatianna Gilliam | Cloud & AI Architect (AZ-305 | AI-102 | AZ-104)
 
+> **Public repo:** [github.com/Tmgilliam/containerized-ml-api](https://github.com/Tmgilliam/containerized-ml-api)
+
 ---
 
 ## The Business Problem
