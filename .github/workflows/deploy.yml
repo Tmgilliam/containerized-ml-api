@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  GCP_REGION: us-central1
+  SERVICE_NAME: containerized-ml-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          IMAGE="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE" .
+
+      - name: Push to Artifact Registry
+        run: docker push "$IMAGE"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          gcloud run deploy "${{ env.SERVICE_NAME }}" \
+            --image "$IMAGE" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 3 \
+            --timeout 30 \
+            --set-env-vars "ENVIRONMENT=production" \
+            --quiet
+          URL=$(gcloud run services describe "${{ env.SERVICE_NAME }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --format 'value(status.url)')
+          echo "service_url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test /health
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if curl -sf "${{ steps.deploy.outputs.service_url }}/health" | grep -q '"status":"healthy"'; then
+              echo "Smoke test passed"
+              exit 0
+            fi
+            echo "Attempt $attempt failed — retrying in 10s"
+            sleep 10
+          done
+          echo "Smoke test failed: /health did not return healthy status"
+          exit 1

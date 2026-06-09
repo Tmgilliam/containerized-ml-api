@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Train model artifact
+        run: python model/train.py
+
+      - name: Run flake8 lint
+        run: flake8 app tests model/train.py --max-line-length=100
+
+      - name: Run pytest
+        run: pytest tests/ -v
+
+      - name: Build Docker image
+        run: docker build -t containerized-ml-api:ci .
