@@ -2,7 +2,8 @@
 
 **Owner:** Dr. Tatianna Gilliam | Cloud & AI Architect (AZ-305 | AI-102 | AZ-104)
 
-> **Public repo:** [github.com/Tmgilliam/containerized-ml-api](https://github.com/Tmgilliam/containerized-ml-api)
+> **Public repo:** [github.com/Tmgilliam/containerized-ml-api](https://github.com/Tmgilliam/containerized-ml-api)  
+> **Live API:** [containerized-ml-api-787251273541.us-central1.run.app](https://containerized-ml-api-787251273541.us-central1.run.app/health)
 
 ---
 

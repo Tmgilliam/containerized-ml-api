@@ -8,7 +8,7 @@ param(
     [string]$ProviderId = "github-provider"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $SaEmail = "${ServiceAccountName}@${ProjectId}.iam.gserviceaccount.com"
 
 Write-Host "Enabling required APIs..."
@@ -39,6 +39,7 @@ gcloud iam workload-identity-pools providers create-oidc $ProviderId `
     --workload-identity-pool=$PoolId `
     --display-name="GitHub Provider" `
     --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" `
+    --attribute-condition="assertion.repository=='$GitHubRepo'" `
     --issuer-uri="https://token.actions.githubusercontent.com" `
     --project=$ProjectId 2>$null
 
