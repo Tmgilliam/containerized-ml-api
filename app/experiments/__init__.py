@@ -6,7 +6,7 @@ from app.experiments.analysis import ExperimentAnalyzer, ExperimentResult
 
 __all__ = [
     "ExperimentRouter",
-    "ExperimentMetrics", 
+    "ExperimentMetrics",
     "ExperimentAnalyzer",
     "ExperimentResult",
 ]

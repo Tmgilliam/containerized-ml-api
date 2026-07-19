@@ -14,7 +14,7 @@ class FeatureContribution:
     feature_value: Any
     contribution: float
     direction: str
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "feature_name": self.feature_name,
@@ -34,7 +34,7 @@ class ExplanationResult:
     model_version: str = "unknown"
     explanation_type: str = "unknown"
     metadata: dict[str, Any] = field(default_factory=dict)
-    
+
     @property
     def top_positive_features(self) -> list[FeatureContribution]:
         """Get features that increased the prediction."""
@@ -43,7 +43,7 @@ class ExplanationResult:
             key=lambda x: abs(x.contribution),
             reverse=True,
         )
-    
+
     @property
     def top_negative_features(self) -> list[FeatureContribution]:
         """Get features that decreased the prediction."""
@@ -52,30 +52,30 @@ class ExplanationResult:
             key=lambda x: abs(x.contribution),
             reverse=True,
         )
-    
+
     def summary(self, top_n: int = 3) -> str:
         """Generate human-readable summary."""
         lines = []
-        
+
         if self.prediction == 1:
             lines.append(f"High delay risk ({self.probability:.1%} probability)")
         else:
             lines.append(f"Low delay risk ({1-self.probability:.1%} confidence)")
-        
+
         positive = self.top_positive_features[:top_n]
         if positive:
             lines.append("\nFactors increasing risk:")
             for f in positive:
                 lines.append(f"  - {f.feature_name}: {f.feature_value} (+{f.contribution:.3f})")
-        
+
         negative = self.top_negative_features[:top_n]
         if negative:
             lines.append("\nFactors decreasing risk:")
             for f in negative:
                 lines.append(f"  - {f.feature_name}: {f.feature_value} ({f.contribution:.3f})")
-        
+
         return "\n".join(lines)
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "prediction": self.prediction,
@@ -92,7 +92,7 @@ class ExplanationResult:
 
 class BaseExplainer(ABC):
     """Base class for model explainers."""
-    
+
     @abstractmethod
     def explain(
         self,
@@ -101,7 +101,7 @@ class BaseExplainer(ABC):
     ) -> ExplanationResult:
         """Generate explanation for a prediction."""
         pass
-    
+
     @abstractmethod
     def explain_batch(
         self,
