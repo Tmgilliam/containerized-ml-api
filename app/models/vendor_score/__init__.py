@@ -1,0 +1,1 @@
+"""Vendor score model package."""

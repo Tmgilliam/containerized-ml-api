@@ -1,10 +1,34 @@
+# Core API
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 pydantic==2.10.3
+
+# ML Core
 scikit-learn==1.5.2
 numpy==2.1.3
 pandas==2.2.3
 joblib==1.4.2
+
+# Statistics (drift detection, A/B testing)
+scipy==1.14.1
+
+# Explainability (optional - install with: pip install shap lime)
+# shap>=0.44.0
+# lime>=0.2.0
+
+# Testing
 pytest==8.3.4
 httpx==0.28.1
+pytest-asyncio==0.24.0
+
+# Code Quality
 flake8==7.1.1
+
+# Cloud SDKs (optional - install as needed)
+# google-cloud-storage>=2.14.0
+# google-cloud-bigquery>=3.14.0
+# google-cloud-secret-manager>=2.18.0
+# redis>=5.0.0
+
+# JWT Authentication (optional)
+# PyJWT[crypto]>=2.8.0
